@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #fdf6f0;
+  --text: #0f0f12;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar — premium touch */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #fdf6f0;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff4d6d, #c9b6ff);
+  border-radius: 999px;
+}
+
+/* Selection color */
+::selection {
+  background: #ffd6e0;
+  color: #0f0f12;
+}
+
+/* Reusable glass card */
+@layer components {
+  .glass {
+    @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-soft;
+  }
+  .glass-dark {
+    @apply bg-ink/60 backdrop-blur-xl border border-white/10;
+  }
+  .btn-primary {
+    @apply px-6 py-3 rounded-full bg-rose text-white font-display font-semibold 
+           transition-all duration-300 hover:scale-105 hover:shadow-glow active:scale-95;
+  }
+}
