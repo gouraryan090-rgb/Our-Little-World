@@ -2,14 +2,23 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { LogOut, Home } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
+import { signOut } from "next-auth/react"; // <-- NextAuth ka signOut import kiya
 
 export default function Navbar({ userName }) {
   const router = useRouter();
 
   const handleLogout = async () => {
+    // Purana custom logout (isse cookie clear hoga)
     await fetch("/api/logout", { method: "POST" });
+    
+    // Naya NextAuth logout (isse Google session clear hoga)
+    await signOut({ 
+      redirect: false, // NextAuth ko khud redirect karne se roka
+    });
+
+    // Manual redirect
     router.push("/login");
     router.refresh();
   };
@@ -26,7 +35,7 @@ export default function Navbar({ userName }) {
         {/* Logo / Home Link */}
         <Link href="/dashboard" className="font-display font-bold text-lg sm:text-xl text-ink flex items-center gap-2 hover:text-rose transition-colors group">
           <div className="bg-rose/10 p-1.5 sm:p-2 rounded-full group-hover:bg-rose/20 transition-colors">
-            <Home size={18} className="sm:w-5 sm:h-5 text-rose" />
+            <span className="text-rose">🏠</span>
           </div>
           <span className="hidden xs:block">Our World</span>
         </Link>
