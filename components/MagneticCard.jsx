@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Link from "next/link";
 
@@ -23,7 +23,6 @@ export default function MagneticCard({ item, index }) {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     
-    // Mouse ki position calculate karo (-0.5 to 0.5 ke beech)
     const width = rect.width;
     const height = rect.height;
     const mouseX = e.clientX - rect.left;
@@ -42,7 +41,7 @@ export default function MagneticCard({ item, index }) {
   };
 
   return (
-    <Link href={`/dashboard/${item.id}`} className="block h-full">
+    <Link href={`/dashboard/${item.id}`} className="block h-full perspective-1000">
       <motion.div
         ref={ref}
         onMouseMove={handleMouseMove}
@@ -55,20 +54,19 @@ export default function MagneticCard({ item, index }) {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: index * 0.1 }}
-        className="glass rounded-4xl p-8 h-full relative overflow-hidden group cursor-pointer 
-                   hover:shadow-[0_0_40px_rgba(255,77,109,0.3)] transition-shadow duration-500"
+        className="glass rounded-[2rem] p-6 sm:p-8 h-full relative overflow-hidden group cursor-pointer shadow-soft hover:shadow-glow transition-shadow duration-500"
       >
         {/* Dynamic Glow Background */}
         <div className={`absolute inset-0 bg-gradient-to-br ${item.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10`} />
         
-        {/* 3D Pop-out effect for content */}
-        <div style={{ transform: "translateZ(50px)" }} className="relative z-10">
+        {/* Content */}
+        <div style={{ transform: "translateZ(40px)" }} className="relative z-10 flex flex-col h-full">
           <h2 className="font-display text-2xl font-bold text-ink mb-2 group-hover:text-rose transition-colors">
             {item.title}
           </h2>
-          <p className="font-body text-ink/70 text-sm">{item.desc}</p>
+          <p className="font-body text-ink/60 text-sm flex-grow">{item.desc}</p>
           
-          <div className="mt-8 flex items-center text-rose font-semibold text-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+          <div className="mt-6 flex items-center text-rose font-bold text-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
             Explore &rarr;
           </div>
         </div>

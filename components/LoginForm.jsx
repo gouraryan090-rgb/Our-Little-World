@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Heart, Loader2 } from "lucide-react";
-import WelcomeAnimation from "./WelcomeAnimation"; // <-- Import animation
+import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import WelcomeAnimation from "./WelcomeAnimation";
 
 export default function LoginForm() {
   const [password, setPassword] = useState("");
@@ -12,7 +12,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [shake, setShake] = useState(0);
-  const [loggedInUser, setLoggedInUser] = useState(null); // Login hone ke baad user state
+  const [loggedInUser, setLoggedInUser] = useState(null);
   const router = useRouter();
 
   async function handleSubmit(e) {
@@ -30,7 +30,7 @@ export default function LoginForm() {
 
     if (res.ok) {
       const data = await res.json();
-      setLoggedInUser(data.name); // Animation show karne ke liye state set
+      setLoggedInUser(data.name); 
     } else {
       setError("Oops! That password doesn't seem right. 💔");
       setShake((s) => s + 1);
@@ -38,13 +38,11 @@ export default function LoginForm() {
     }
   }
 
-  // Jab animation complete ho jaye tab redirect karo
   const handleAnimationComplete = () => {
     router.push("/dashboard");
     router.refresh();
   };
 
-  // Agar user logged in hai, toh sabse pehle WelcomeAnimation dikhao
   if (loggedInUser) {
     return (
       <WelcomeAnimation 
@@ -54,37 +52,46 @@ export default function LoginForm() {
     );
   }
 
-  // Warna normal login form dikhao
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="relative z-10 w-full max-w-md"
+      className="relative z-10 w-full max-w-md mt-16 sm:mt-10"
     >
       <motion.div
         key={shake}
-        animate={shake ? { x: [0, -12, 12, -8, 8, 0] } : {}}
+        animate={shake ? { x: [0, -10, 10, -8, 8, 0] } : {}}
         transition={{ duration: 0.5 }}
-        className="glass rounded-4xl p-8 sm:p-10 shadow-soft"
+        className="bg-white border-2 border-ink rounded-[2.5rem] p-8 sm:p-12 shadow-[8px_8px_0px_rgba(15,15,18,1)] relative"
       >
-        <motion.div
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="mx-auto mb-6 w-16 h-16 rounded-full bg-gradient-to-br from-rose to-lilac flex items-center justify-center shadow-glow"
-        >
-          <Heart className="w-8 h-8 text-white fill-white" />
-        </motion.div>
+        {/* Hamster Gif Overlapping Top Left */}
+        <div className="absolute -top-14 -left-8 sm:-top-16 sm:-left-12">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-ink overflow-hidden bg-[#FCF4ED] shadow-sm">
+            <img 
+              src="https://res.cloudinary.com/dt79hdebz/image/upload/lovely/defaults/auth_cat_gif.gif" 
+              alt="Cute Hamster" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
 
-        <h1 className="font-display text-3xl sm:text-4xl text-center text-ink mb-2">
-          Our Little World
-        </h1>
-        <p className="font-accent italic text-center text-ink/60 mb-8">
-          Just for the two of us.
+        {/* Logo inside Card */}
+        <div className="flex justify-center mb-2 mt-4">
+          <h2 className="font-display text-3xl font-extrabold text-rose tracking-tight flex items-center gap-1 bg-pink-100 px-4 py-1 rounded-full border border-rose/30">
+            O<span className="text-ink">ur</span>W<span className="text-ink">orld</span>
+          </h2>
+        </div>
+        
+        <p className="font-body text-center text-ink/70 mb-8 text-sm sm:text-base px-4">
+          Sign in to access our private interactive love space
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Mail className="text-ink/40" size={20} />
+            </div>
             <input
               type={show ? "text" : "password"}
               value={password}
@@ -94,10 +101,7 @@ export default function LoginForm() {
               }}
               placeholder="Enter your secret password..."
               autoFocus
-              className="w-full px-5 py-4 rounded-full bg-white/70 border border-white/60 
-                         font-body text-ink placeholder:text-ink/40 
-                         focus:outline-none focus:ring-2 focus:ring-rose/50 
-                         transition-all duration-300 pr-14"
+              className="w-full pl-12 pr-12 py-4 rounded-full bg-white border-2 border-ink/20 focus:border-ink font-body text-ink placeholder:text-ink/40 focus:outline-none transition-all duration-300 shadow-sm"
             />
             <button
               type="button"
@@ -114,7 +118,7 @@ export default function LoginForm() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="text-rose text-sm text-center font-body"
+                className="text-rose text-sm text-center font-body font-semibold"
               >
                 {error}
               </motion.p>
@@ -122,13 +126,13 @@ export default function LoginForm() {
           </AnimatePresence>
 
           <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             disabled={loading}
             type="submit"
-            className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full py-4 rounded-full bg-rose text-white border-2 border-ink font-display font-bold text-lg shadow-[4px_4px_0px_rgba(15,15,18,1)] hover:shadow-[2px_2px_0px_rgba(15,15,18,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading && !loggedInUser ? (
+            {loading ? (
               <>
                 <Loader2 className="animate-spin" size={20} />
                 Unlocking...
@@ -138,6 +142,12 @@ export default function LoginForm() {
             )}
           </motion.button>
         </form>
+
+        <div className="mt-8 pt-6 border-t border-ink/10 text-center">
+          <p className="text-xs text-ink/40 font-body">
+            By entering, you agree that this is a private space for Aryan & Manshi only.
+          </p>
+        </div>
       </motion.div>
     </motion.div>
   );
