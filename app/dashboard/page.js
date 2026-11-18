@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import MagneticCard from "../../components/MagneticCard";
 
 const menuItems = [
@@ -16,6 +18,15 @@ const menuItems = [
 ];
 
 export default function DashboardHome() {
+  const router = useRouter();
+  const [isLoadingSpace, setIsLoadingSpace] = useState(false);
+
+  const handleEnterSpace = (e) => {
+    e.preventDefault();
+    setIsLoadingSpace(true);
+    router.push("/dashboard/space");
+  };
+
   return (
     <div className="space-y-12 pb-20">
       <motion.div
@@ -39,7 +50,10 @@ export default function DashboardHome() {
 
       {/* Our Shared Space Banner (Interactive Features Hub) */}
       <div className="mt-16 pt-12 border-t border-ink/10">
-        <Link href="/dashboard/space" className="block group">
+        <div 
+          onClick={handleEnterSpace}
+          className="block group cursor-pointer"
+        >
           <div className="glass rounded-[2rem] p-6 sm:p-8 border border-rose/25 bg-gradient-to-r from-rose/10 via-transparent to-pink-500/10 hover:border-rose/50 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-rose">
@@ -49,16 +63,25 @@ export default function DashboardHome() {
                 Our Shared Space
               </h2>
               <p className="font-body text-ink/60 text-sm sm:text-base mt-1">
-                Explore our interactive features.
+                Explore our interactive features[cite: 3].
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-2 bg-rose text-white font-body font-bold px-6 py-3.5 rounded-2xl shadow-lg shadow-rose/25 group-hover:bg-rose/90 transition-all shrink-0">
-              <span>Enter Space</span>
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            <div className="inline-flex items-center justify-center gap-2 bg-rose text-white font-body font-bold px-6 py-3.5 rounded-2xl shadow-lg shadow-rose/25 group-hover:bg-rose/90 transition-all shrink-0 min-w-[140px]">
+              {isLoadingSpace ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Loading...</span>
+                </div>
+              ) : (
+                <>
+                  <span>Enter Space</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </>
+              )}
             </div>
           </div>
-        </Link>
+        </div>
       </div>
 
       {/* Footer Links */}
