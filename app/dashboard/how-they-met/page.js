@@ -8,7 +8,7 @@ export default function HowTheyMet() {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className="max-w-5xl mx-auto pt-10 pb-20">
+    <div className="max-w-5xl mx-auto pt-10 pb-20 px-4 sm:px-6">
       {/* Back Button */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -45,7 +45,7 @@ export default function HowTheyMet() {
 
                 {!imgError && (
                   <img
-                    src="https://dummyimage.com/600x800/fce7f3/9f1239.png&text=Our+First+Meet" // <-- Theme matching dummy link
+                    src="https://img.magnific.com/free-photo/couple-holding-hands-romantic-valentine-s-illustration-social-media-post_53876-104446.jpg?semt=ais_hybrid&w=740&q=80" 
                     alt="How They Met"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     onError={() => setImgError(true)}
@@ -68,16 +68,16 @@ export default function HowTheyMet() {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full lg:w-1/2 flex flex-col justify-center relative"
+          className="w-full lg:w-1/2 flex flex-col justify-center relative pl-6 sm:pl-0"
         >
           {/* Vertical Line for Timeline */}
-          <div className="absolute left-[15px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-rose/40 via-lilac/40 to-rose/40 opacity-40 rounded-full hidden sm:block" />
+          <div className="absolute left-[15px] sm:left-[15px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-rose/40 via-lilac/40 to-rose/40 opacity-40 rounded-full block" />
 
           <div className="space-y-8 sm:space-y-12">
             
-            {/* Step 1 - Color Changed to Rose/Peach */}
-            <div className="relative pl-0 sm:pl-12">
-              <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-rose/20 border-2 border-rose flex items-center justify-center hidden sm:flex shadow-[0_0_15px_rgba(225,29,72,0.4)]">
+            {/* Step 1 */}
+            <div className="relative pl-8 sm:pl-12">
+              <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-rose/20 border-2 border-rose flex items-center justify-center flex shadow-[0_0_15px_rgba(225,29,72,0.4)]">
                 <div className="w-3 h-3 rounded-full bg-rose" />
               </div>
               <h3 className="font-display text-xl font-bold text-ink mb-2">The "Admin Sahab" Era</h3>
@@ -87,8 +87,8 @@ export default function HowTheyMet() {
             </div>
 
             {/* Step 2 */}
-            <div className="relative pl-0 sm:pl-12">
-              <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-lilac/20 border-2 border-lilac flex items-center justify-center hidden sm:flex shadow-[0_0_15px_rgba(201,182,255,0.5)]">
+            <div className="relative pl-8 sm:pl-12">
+              <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-lilac/20 border-2 border-lilac flex items-center justify-center flex shadow-[0_0_15px_rgba(201,182,255,0.5)]">
                 <div className="w-3 h-3 rounded-full bg-lilac" />
               </div>
               <h3 className="font-display text-xl font-bold text-ink mb-2">A New Space</h3>
@@ -98,8 +98,8 @@ export default function HowTheyMet() {
             </div>
 
             {/* Step 3 */}
-            <div className="relative pl-0 sm:pl-12">
-              <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-rose/20 border-2 border-rose flex items-center justify-center hidden sm:flex shadow-[0_0_15px_rgba(225,29,72,0.5)]">
+            <div className="relative pl-8 sm:pl-12">
+              <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-rose/20 border-2 border-rose flex items-center justify-center flex shadow-[0_0_15px_rgba(225,29,72,0.5)]">
                 <div className="w-3 h-3 rounded-full bg-rose" />
               </div>
               <h3 className="font-display text-xl font-bold text-ink mb-2">The First DM</h3>
@@ -109,8 +109,8 @@ export default function HowTheyMet() {
             </div>
 
             {/* Step 4 */}
-            <div className="relative pl-0 sm:pl-12">
-              <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-rose flex items-center justify-center hidden sm:flex shadow-[0_0_20px_rgba(225,29,72,0.8)]">
+            <div className="relative pl-8 sm:pl-12">
+              <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-rose flex items-center justify-center flex shadow-[0_0_20px_rgba(225,29,72,0.8)]">
                 <span className="text-white text-xs">❤️</span>
               </div>
               <h3 className="font-display text-2xl font-bold text-rose mb-2 mt-4">From Friends to Soulmates</h3>

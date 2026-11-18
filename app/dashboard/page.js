@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import MagneticCard from "../../components/MagneticCard";
 
 const menuItems = [
@@ -35,6 +36,41 @@ export default function DashboardHome() {
           <MagneticCard key={item.id} item={item} index={index} />
         ))}
       </div>
+
+      {/* Our Shared Space Banner (Interactive Features Hub) */}
+      <div className="mt-16 pt-12 border-t border-ink/10">
+        <Link href="/dashboard/space" className="block group">
+          <div className="glass rounded-[2rem] p-6 sm:p-8 border border-rose/25 bg-gradient-to-r from-rose/10 via-transparent to-pink-500/10 hover:border-rose/50 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest text-rose">
+                Interactive Hub ✨
+              </span>
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink mt-1 group-hover:text-rose transition-colors">
+                Our Shared Space
+              </h2>
+              <p className="font-body text-ink/60 text-sm sm:text-base mt-1">
+                Explore our interactive features.
+              </p>
+            </div>
+
+            <div className="inline-flex items-center gap-2 bg-rose text-white font-body font-bold px-6 py-3.5 rounded-2xl shadow-lg shadow-rose/25 group-hover:bg-rose/90 transition-all shrink-0">
+              <span>Enter Space</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Footer Links */}
+      <footer className="mt-24 pt-8 border-t border-ink/10 text-center font-body text-sm text-ink/50 space-x-3">
+        <Link href="/privacy-policy" className="hover:text-rose transition-colors">
+          privacy policy
+        </Link>
+        <span>|</span>
+        <Link href="/terms-of-service" className="hover:text-rose transition-colors">
+          terms of service
+        </Link>
+      </footer>
     </div>
   );
 }
