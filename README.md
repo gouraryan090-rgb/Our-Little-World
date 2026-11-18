@@ -14,7 +14,7 @@ npm install
 npm run dev
 \`\`\`
 
-Open http://localhost:3000
+Open http://knottogether.vecel.app
 
 ## Env vars
 See \`.env.local\` (not committed).
