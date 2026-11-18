@@ -15,6 +15,15 @@ const FEATURES = [
     color: "from-rose/20 to-pink-500/10 border-rose/30",
   },
   {
+    id: "leaderboard",
+    title: "Couple Leaderboard",
+    description: "See who has more coins, track live streaks, and check who is ruling the board.",
+    href: "/dashboard/space/leaderboard",
+    icon: "🏆",
+    badge: "Live",
+    color: "from-amber-500/20 to-orange-500/10 border-amber-500/30",
+  },
+  {
     id: "promise-letter",
     title: "Eternal Promise Letter",
     description: "A permanent pact sealed with our real thumbprints—locked forever.",
