@@ -1,26 +1,25 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 export default function MagneticCard({ item, index }) {
   const ref = useRef(null);
+  const [isNavigating, setIsNavigating] = useState(false);
   
-  // Mouse position track karne ke liye
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Smooth spring animation
   const mouseXSpring = useSpring(x, { stiffness: 150, damping: 20 });
   const mouseYSpring = useSpring(y, { stiffness: 150, damping: 20 });
 
-  // Tilt effect (Rotate X aur Y)
   const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
 
   const handleMouseMove = (e) => {
-    if (!ref.current) return;
+    if (!ref.current || isNavigating) return;
     const rect = ref.current.getBoundingClientRect();
     
     const width = rect.width;
@@ -41,7 +40,11 @@ export default function MagneticCard({ item, index }) {
   };
 
   return (
-    <Link href={`/dashboard/${item.id}`} className="block h-full perspective-1000">
+    <Link 
+      href={`/dashboard/${item.id}`} 
+      className="block h-full perspective-1000"
+      onClick={() => setIsNavigating(true)}
+    >
       <motion.div
         ref={ref}
         onMouseMove={handleMouseMove}
@@ -54,8 +57,15 @@ export default function MagneticCard({ item, index }) {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: index * 0.1 }}
-        className="glass rounded-[2rem] p-6 sm:p-8 h-full relative overflow-hidden group cursor-pointer shadow-soft hover:shadow-glow transition-shadow duration-500"
+        className={`glass rounded-[2rem] p-6 sm:p-8 h-full relative overflow-hidden group cursor-pointer shadow-soft hover:shadow-glow transition-all duration-500 ${isNavigating ? "scale-95 opacity-80" : ""}`}
       >
+        {/* Loading Overlay on Click */}
+        {isNavigating && (
+          <div className="absolute inset-0 z-50 bg-white/50 backdrop-blur-sm flex items-center justify-center rounded-[2rem]">
+            <Loader2 className="animate-spin text-rose w-8 h-8" />
+          </div>
+        )}
+
         {/* Dynamic Glow Background */}
         <div className={`absolute inset-0 bg-gradient-to-br ${item.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10`} />
         

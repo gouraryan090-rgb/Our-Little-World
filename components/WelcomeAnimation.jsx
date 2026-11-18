@@ -4,25 +4,25 @@ import { motion } from "framer-motion";
 import { useEffect } from "react";
 
 export default function WelcomeAnimation({ userName, onComplete }) {
-  // Name decide karo
   const fullName = userName === "Manshi" ? "Welcome Manshi Sharma" : "Welcome Aryan Gour";
-  const nameArray = fullName.split("");
+  
+  // Text ko words me split karo taaki words beech me na tootein
+  const words = fullName.split(" ");
+  let globalCharCount = 0; // Animation delay sequential rakhne ke liye
 
-  // Animation khatam hone ke baad onComplete call karo
   useEffect(() => {
     const timer = setTimeout(() => {
       onComplete();
-    }, 4000); // 4 seconds ka cinematic experience
+    }, 4000); // 4 seconds
     return () => clearTimeout(timer);
   }, [onComplete]);
 
-  // Floating particles generate karo (background ke liye)
   const particles = Array.from({ length: 20 });
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0a0a] overflow-hidden">
       
-      {/* Expanding Glowing Circle Background */}
+      {/* Background Glow */}
       <motion.div 
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 0.6 }}
@@ -30,7 +30,7 @@ export default function WelcomeAnimation({ userName, onComplete }) {
         className="absolute w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] bg-gradient-to-br from-rose via-lilac to-mint rounded-full blur-[100px] -z-10"
       />
 
-      {/* Floating Particles */}
+      {/* Particles */}
       {particles.map((_, i) => (
         <motion.div
           key={i}
@@ -54,30 +54,38 @@ export default function WelcomeAnimation({ userName, onComplete }) {
         />
       ))}
 
-      {/* Text Container */}
-      <div className="relative z-10 text-center flex flex-wrap justify-center max-w-4xl px-4">
-        {nameArray.map((char, index) => (
-          <motion.span
-            key={index}
-            initial={{ opacity: 0, y: 100, scale: 0.5, rotateX: -90 }}
-            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-            transition={{
-              duration: 0.8,
-              delay: index * 0.06, // Stagger effect
-              type: "spring",
-              stiffness: 200,
-              damping: 15
-            }}
-            className={`font-display text-4xl sm:text-6xl md:text-8xl font-extrabold text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] ${
-              char === " " ? "w-4 sm:w-8" : ""
-            }`}
-          >
-            {char === " " ? "\u00A0" : char}
-          </motion.span>
+      {/* Text Container - Words me wrap kiya */}
+      <div className="relative z-10 text-center flex flex-wrap justify-center gap-x-4 gap-y-2 max-w-[90vw] sm:max-w-4xl px-4">
+        {words.map((word, wordIndex) => (
+          <div key={wordIndex} className="flex flex-nowrap">
+            {word.split("").map((char, charIndex) => {
+              // Har letter ke liye ek global delay calculate karo
+              const delay = globalCharCount * 0.05;
+              globalCharCount++;
+              
+              return (
+                <motion.span
+                  key={charIndex}
+                  initial={{ opacity: 0, y: 50, scale: 0.5, rotateX: -90 }}
+                  animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                  transition={{
+                    duration: 0.8,
+                    delay: delay,
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 15
+                  }}
+                  className="font-display text-5xl sm:text-7xl md:text-8xl font-extrabold text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] inline-block"
+                >
+                  {char}
+                </motion.span>
+              );
+            })}
+          </div>
         ))}
       </div>
 
-      {/* Cinematic glowing line */}
+      {/* Glowing line */}
       <motion.div 
         initial={{ width: 0, opacity: 0 }}
         animate={{ width: "80%", opacity: 1 }}

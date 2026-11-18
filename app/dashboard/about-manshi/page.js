@@ -171,7 +171,7 @@ export default function AboutManshi() {
 
             {/* Snapchat Button */}
             <a
-              href="https://snapchat.com/add/manshisharma_"
+              href="https://snapchat.com/add/beiinggmanshi"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-yellow-400/10 hover:bg-yellow-400/20 px-4 py-2 rounded-full backdrop-blur-md border border-yellow-400/30 hover:border-yellow-400/50 transition-all text-ink/80 hover:text-ink group shadow-[0_0_15px_rgba(250,204,21,0)] hover:shadow-[0_0_20px_rgba(250,204,21,0.3)]"
@@ -181,7 +181,7 @@ export default function AboutManshi() {
                 alt="Snapchat"
                 className="w-[18px] h-[18px] object-contain group-hover:scale-110 group-hover:-rotate-6 transition-transform drop-shadow-md"
               />
-              <span className="font-semibold text-sm">manshisharma_</span>
+              <span className="font-semibold text-sm">beiinggmanshi</span>
             </a>
           </div>
 

@@ -1,22 +1,9 @@
-"use client"; // <-- Client component banaya
+"use client";
 
 import LoginForm from "../../components/LoginForm";
 import { Heart, Star, Sparkles } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    // Agar pehle se login hai, toh direct dashboard bhej do
-    if (status === "authenticated") {
-      router.push("/dashboard");
-    }
-  }, [status, router]);
-
   return (
     <main className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center px-4 bg-[#FCF4ED]">
       

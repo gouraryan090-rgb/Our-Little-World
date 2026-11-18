@@ -2,25 +2,35 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react"; // <-- Loader2 import kiya
 import Link from "next/link";
-import { signOut } from "next-auth/react"; // <-- NextAuth ka signOut import kiya
+import { signOut } from "next-auth/react";
+import { useState } from "react"; // <-- useState import kiya
 
 export default function Navbar({ userName }) {
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // <-- Logout loading state
 
   const handleLogout = async () => {
-    // Purana custom logout (isse cookie clear hoga)
-    await fetch("/api/logout", { method: "POST" });
-    
-    // Naya NextAuth logout (isse Google session clear hoga)
-    await signOut({ 
-      redirect: false, // NextAuth ko khud redirect karne se roka
-    });
+    if (isLoggingOut) return; // Double click se bachne ke liye
+    setIsLoggingOut(true);
 
-    // Manual redirect
-    router.push("/login");
-    router.refresh();
+    try {
+      // Purana custom logout (isse cookie clear hoga)
+      await fetch("/api/logout", { method: "POST" });
+      
+      // Naya NextAuth logout (isse Google session clear hoga)
+      await signOut({ 
+        redirect: false, // NextAuth ko khud redirect karne se roka
+      });
+
+      // Manual redirect
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed", error);
+      setIsLoggingOut(false); // Error aaye toh wapas normal kar do
+    }
   };
 
   return (
@@ -47,10 +57,15 @@ export default function Navbar({ userName }) {
           </span>
           <button
             onClick={handleLogout}
-            className="p-1.5 sm:p-2 rounded-full bg-white/40 border border-white/60 hover:bg-rose/10 hover:text-rose transition-all duration-300 group shadow-sm"
+            disabled={isLoggingOut}
+            className="p-1.5 sm:p-2 rounded-full bg-white/40 border border-white/60 hover:bg-rose/10 hover:text-rose transition-all duration-300 group shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[32px] min-h-[32px]"
             title="Logout"
           >
-            <LogOut size={16} className="sm:w-[18px] sm:h-[18px] group-hover:-translate-x-1 transition-transform" />
+            {isLoggingOut ? (
+              <Loader2 size={16} className="animate-spin text-rose sm:w-[18px] sm:h-[18px]" />
+            ) : (
+              <LogOut size={16} className="sm:w-[18px] sm:h-[18px] group-hover:-translate-x-1 transition-transform" />
+            )}
           </button>
         </div>
         
