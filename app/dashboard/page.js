@@ -63,7 +63,7 @@ export default function DashboardHome() {
                 Our Shared Space
               </h2>
               <p className="font-body text-ink/60 text-sm sm:text-base mt-1">
-                Explore our interactive features[cite: 3].
+                Explore our interactive features.
               </p>
             </div>
 

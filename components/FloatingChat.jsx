@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { db } from "../lib/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function FloatingChat({ currentUser = "Aryan" }) {
@@ -19,37 +18,75 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
   const scrollRef = useRef(null);
   const isOpenRef = useRef(isOpen);
 
-  // Keep isOpen ref updated
   useEffect(() => {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
-  const isAryanLoggedIn = currentUser?.toLowerCase().includes("aryan");
+  const cleanCurrentUser = currentUser?.trim().toLowerCase() || "aryan";
+  const isAryanLoggedIn = cleanCurrentUser.includes("aryan");
+  
+  // Partner Name & Avatar Mapping
   const partnerName = isAryanLoggedIn ? "Manshi" : "Aryan";
   const partnerAvatar = isAryanLoggedIn
     ? "https://cdn.phototourl.com/anon/2026-11-16-6754668a-5436-4042-847e-78e5a7ca0c87.jpg"
     : "https://cdn.phototourl.com/anon/2026-11-16-563a4d22-6ffc-437c-b975-20413ec7ef05.png";
 
-  // Real-time messages fetch (Fixed with stable listener)
+  // Real-time syncing with Supabase
   useEffect(() => {
-    const q = query(collection(db, "couple_chats"), orderBy("createdAt", "asc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((docItem) => ({ id: docItem.id, ...docItem.data() }));
+    async function fetchMessages() {
+      const { data, error } = await supabase
+        .from("couple_chats")
+        .select("*")
+        .order("created_at", { ascending: true });
 
-      setMessages((prevMsgs) => {
-        if (!isOpenRef.current && msgs.length > prevMsgs.length) {
-          setHasUnread(true);
+      if (error) {
+        console.error("Error fetching messages:", error);
+      } else {
+        setMessages(data || []);
+      }
+    }
+
+    fetchMessages();
+
+    // Supabase Realtime Subscription
+    const channel = supabase
+      .channel("couple_chats_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "couple_chats" },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const incomingMsg = payload.new;
+            const incomingSender = incomingMsg.sender?.trim().toLowerCase() || "";
+
+            setMessages((prev) => {
+              if (prev.some((msg) => msg.id === incomingMsg.id)) return prev;
+              const updated = [...prev, incomingMsg];
+
+              // Agar chat box closed hai aur message partner ne bheja hai, toh red dot on kar do
+              if (!isOpenRef.current && incomingSender !== cleanCurrentUser) {
+                setHasUnread(true);
+              }
+
+              return updated;
+            });
+          } else if (payload.eventType === "DELETE") {
+            setMessages((prev) => prev.filter((msg) => msg.id !== payload.old.id));
+          } else if (payload.eventType === "UPDATE") {
+            setMessages((prev) =>
+              prev.map((msg) => (msg.id === payload.new.id ? payload.new : msg))
+            );
+          }
         }
-        return msgs;
-      });
-    }, (error) => {
-      console.error("Firestore sync error: ", error);
-    });
+      )
+      .subscribe();
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [cleanCurrentUser]);
 
-  // Auto scroll
+  // Auto scroll & clear unread when opened
   useEffect(() => {
     if (isOpen) {
       scrollRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -62,33 +99,45 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    await addDoc(collection(db, "couple_chats"), {
-      sender: currentUser,
-      text: newMessage.trim(),
-      createdAt: serverTimestamp(),
-      isEdited: false,
-    });
+    const { error } = await supabase.from("couple_chats").insert([
+      {
+        sender: currentUser.trim(),
+        text: newMessage.trim(),
+        is_edited: false,
+      },
+    ]);
 
-    setNewMessage("");
+    if (error) {
+      console.error("Error sending message:", error);
+    } else {
+      setNewMessage("");
+    }
   }
 
-  // Delete / Unsend Message (Sirf apna message)
+  // Unsend Message (Delete)
   async function handleDelete(msg) {
-    if (msg.sender !== currentUser) return;
-    try {
-      await deleteDoc(doc(db, "couple_chats", msg.id));
+    const msgSender = msg.sender?.trim().toLowerCase() || "";
+    if (msgSender !== cleanCurrentUser) return;
+
+    const { error } = await supabase
+      .from("couple_chats")
+      .delete()
+      .eq("id", msg.id);
+
+    if (error) {
+      console.error("Error deleting message:", error);
+    } else {
       setSelectedMsgId(null);
-    } catch (error) {
-      console.error("Error deleting message: ", error);
     }
   }
 
   // Check if edit is within 10 minutes
   function canEdit(msg) {
-    if (msg.sender !== currentUser) return false;
-    if (!msg.createdAt) return true;
+    const msgSender = msg.sender?.trim().toLowerCase() || "";
+    if (msgSender !== cleanCurrentUser) return false;
+    if (!msg.created_at) return true;
     
-    const msgTime = msg.createdAt.toDate ? msg.createdAt.toDate().getTime() : new Date(msg.createdAt).getTime();
+    const msgTime = new Date(msg.created_at).getTime();
     const now = new Date().getTime();
     const diffMinutes = (now - msgTime) / (1000 * 60);
 
@@ -98,35 +147,37 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
   // Save Edited Message
   async function handleSaveEdit(msgId) {
     if (!editText.trim()) return;
-    try {
-      await updateDoc(doc(db, "couple_chats", msgId), {
-        text: editText.trim(),
-        isEdited: true,
-      });
+
+    const { error } = await supabase
+      .from("couple_chats")
+      .update({ text: editText.trim(), is_edited: true })
+      .eq("id", msgId);
+
+    if (error) {
+      console.error("Error updating message:", error);
+    } else {
       setEditingMsgId(null);
       setEditText("");
       setSelectedMsgId(null);
-    } catch (error) {
-      console.error("Error updating message: ", error);
     }
   }
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      {/* Floating Bubble Button */}
+      {/* Floating Bubble Button with Theme-matched styling & Unread Dot */}
       {!isOpen && (
         <motion.button
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {
             setIsOpen(true);
             setHasUnread(false);
           }}
-          className="relative w-14 h-14 rounded-full bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-500 text-white flex items-center justify-center shadow-[0_0_25px_rgba(244,63,94,0.4)] border border-white/20 text-2xl"
+          className="relative w-14 h-14 rounded-full bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-400 text-white flex items-center justify-center shadow-[0_8px_30px_rgba(244,63,94,0.35)] border border-white/30 text-2xl transition-all"
         >
           💬
           {hasUnread && (
-            <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-zinc-950 rounded-full animate-bounce" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-600 border-2 border-[#FDFBF7] rounded-full animate-bounce shadow-md" />
           )}
         </motion.button>
       )}
@@ -167,12 +218,13 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-950/60">
               {messages.map((msg) => {
-                const isMe = msg.sender === currentUser;
+                const msgSender = msg.sender?.trim().toLowerCase() || "";
+                const isMe = msgSender === cleanCurrentUser;
                 const isSelected = selectedMsgId === msg.id;
                 const isEditing = editingMsgId === msg.id;
 
-                const timeString = msg.createdAt?.toDate 
-                  ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+                const timeString = msg.created_at 
+                  ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
                   : "Just now";
 
                 return (
@@ -221,14 +273,14 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
                         <div>
                           <p className="leading-relaxed">{msg.text}</p>
                           <div className="flex items-center gap-1.5 justify-end mt-1">
-                            {msg.isEdited && <span className="text-[9px] text-white/70 italic">(edited)</span>}
+                            {msg.is_edited && <span className="text-[9px] text-white/70 italic">(edited)</span>}
                             <span className="text-[9px] text-white/80">{timeString}</span>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Action Popup Menu (Edit & Unsend) */}
+                    {/* Action Popup Menu (Edit & Unsend on tap) */}
                     {isSelected && isMe && !isEditing && (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: -5 }}
