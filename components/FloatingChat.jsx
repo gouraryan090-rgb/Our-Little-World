@@ -17,6 +17,12 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
   const [editText, setEditText] = useState("");
 
   const scrollRef = useRef(null);
+  const isOpenRef = useRef(isOpen);
+
+  // Keep isOpen ref updated
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
   const isAryanLoggedIn = currentUser?.toLowerCase().includes("aryan");
   const partnerName = isAryanLoggedIn ? "Manshi" : "Aryan";
@@ -24,20 +30,24 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
     ? "https://cdn.phototourl.com/anon/2026-11-16-6754668a-5436-4042-847e-78e5a7ca0c87.jpg"
     : "https://cdn.phototourl.com/anon/2026-11-16-563a4d22-6ffc-437c-b975-20413ec7ef05.png";
 
-  // Real-time messages fetch
+  // Real-time messages fetch (Fixed with stable listener)
   useEffect(() => {
     const q = query(collection(db, "couple_chats"), orderBy("createdAt", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map((docItem) => ({ id: docItem.id, ...docItem.data() }));
 
-      if (isOpen === false && msgs.length > messages.length) {
-        setHasUnread(true);
-      }
-      setMessages(msgs);
+      setMessages((prevMsgs) => {
+        if (!isOpenRef.current && msgs.length > prevMsgs.length) {
+          setHasUnread(true);
+        }
+        return msgs;
+      });
+    }, (error) => {
+      console.error("Firestore sync error: ", error);
     });
 
     return () => unsubscribe();
-  }, [isOpen, messages.length]);
+  }, []);
 
   // Auto scroll
   useEffect(() => {
