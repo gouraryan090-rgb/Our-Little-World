@@ -1,58 +1,70 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase";
 
 export default function MaintenanceGuard() {
   const [isMaintenance, setIsMaintenance] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
+  const checkStatus = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("app_config")
+        .select("is_maintenance")
+        .eq("id", 1)
+        .single();
 
-    // 1. Initial fetch (Non-blocking)
-    const checkStatus = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("app_config")
-          .select("is_maintenance")
-          .eq("id", 1)
-          .single();
-
-        if (!error && data && isMounted) {
-          setIsMaintenance(Boolean(data.is_maintenance));
-        }
-      } catch (err) {
-        console.error("Maintenance check error:", err);
+      if (!error && data) {
+        setIsMaintenance(Boolean(data.is_maintenance));
       }
-    };
+    } catch (err) {
+      console.error("Maintenance check error:", err);
+    }
+  }, []);
 
+  useEffect(() => {
+    // 1. Initial check
     checkStatus();
 
-    // 2. Realtime listener
+    // 2. Realtime listener (Instant trigger)
     const channel = supabase
       .channel("maintenance_watcher")
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "app_config",
           filter: "id=eq.1",
         },
         (payload) => {
-          if (payload && payload.new && isMounted) {
+          if (payload?.new && typeof payload.new.is_maintenance !== "undefined") {
             setIsMaintenance(Boolean(payload.new.is_maintenance));
           }
         }
       )
       .subscribe();
 
-    return () => {
-      isMounted = false;
-      supabase.removeChannel(channel);
+    // 3. Fallback Polling (Har 10 second mein check karega agar websocket sleep ho jaye)
+    const interval = setInterval(() => {
+      checkStatus();
+    }, 10000);
+
+    // 4. Tab wapas kholne par turant check karega
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        checkStatus();
+      }
     };
-  }, []);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [checkStatus]);
 
   return (
     <AnimatePresence>

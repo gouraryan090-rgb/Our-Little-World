@@ -1,7 +1,8 @@
 import "./globals.css";
 import { Sora, Inter, Playfair_Display } from "next/font/google";
 import SmoothScroll from "../components/SmoothScroll";
-import Providers from "./providers"; // <-- Import kiya
+import Providers from "./providers";
+import MaintenanceGuard from "../components/MaintenanceGuard";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -29,8 +30,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${sora.variable} ${inter.variable} ${playfair.variable}`}>
       <body className="font-body">
-        {/* Providers me wrap kiya taaki NextAuth session sabko mile */}
         <Providers>
+          <MaintenanceGuard />
           <SmoothScroll>{children}</SmoothScroll>
         </Providers>
       </body>
