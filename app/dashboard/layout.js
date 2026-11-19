@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import PageTransition from "../../components/PageTransition";
+import FloatingChat from "../../components/FloatingChat"; // <-- FloatingChat import kiya
 import { Heart, Star, Sparkles } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
@@ -59,6 +60,9 @@ export default function DashboardLayout({ children }) {
             {children}
           </PageTransition>
         </main>
+
+        {/* Global Floating Chat Box */}
+        <FloatingChat currentUser={session.user.name} />
       </div>
     );
   }

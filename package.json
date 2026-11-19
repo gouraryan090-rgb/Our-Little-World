@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",
+    "firebase": "^13.4.0",
     "framer-motion": "^14.14.0",
     "googleapis": "^140.0.1",
     "gsap": "^3.15.1",
