@@ -10,7 +10,8 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
   const [newMessage, setNewMessage] = useState("");
   const [hasUnread, setHasUnread] = useState(false);
   
-  // Edit & Active Menu States
+  // Reply, Edit & Active Menu States
+  const [replyingTo, setReplyingTo] = useState(null);
   const [selectedMsgId, setSelectedMsgId] = useState(null);
   const [editingMsgId, setEditingMsgId] = useState(null);
   const [editText, setEditText] = useState("");
@@ -63,7 +64,6 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
               if (prev.some((msg) => msg.id === incomingMsg.id)) return prev;
               const updated = [...prev, incomingMsg];
 
-              // Agar chat box closed hai aur message partner ne bheja hai, toh red dot on kar do
               if (!isOpenRef.current && incomingSender !== cleanCurrentUser) {
                 setHasUnread(true);
               }
@@ -94,23 +94,25 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
     }
   }, [messages, isOpen]);
 
-  // Send Message
+  // Send Message with Optional Reply
   async function sendMessage(e) {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    const { error } = await supabase.from("couple_chats").insert([
-      {
-        sender: currentUser.trim(),
-        text: newMessage.trim(),
-        is_edited: false,
-      },
-    ]);
+    const messageData = {
+      sender: currentUser.trim(),
+      text: newMessage.trim(),
+      is_edited: false,
+      reply_to: replyingTo ? { id: replyingTo.id, sender: replyingTo.sender, text: replyingTo.text } : null,
+    };
+
+    const { error } = await supabase.from("couple_chats").insert([messageData]);
 
     if (error) {
       console.error("Error sending message:", error);
     } else {
       setNewMessage("");
+      setReplyingTo(null);
     }
   }
 
@@ -164,7 +166,7 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      {/* Floating Bubble Button with Theme-matched styling & Unread Dot */}
+      {/* Floating Bubble Button */}
       {!isOpen && (
         <motion.button
           whileHover={{ scale: 1.08 }}
@@ -216,12 +218,14 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-950/60">
-              {messages.map((msg) => {
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-950/60 relative">
+              {messages.map((msg, index) => {
                 const msgSender = msg.sender?.trim().toLowerCase() || "";
                 const isMe = msgSender === cleanCurrentUser;
                 const isSelected = selectedMsgId === msg.id;
                 const isEditing = editingMsgId === msg.id;
+
+                const isNearBottom = index >= messages.length - 2;
 
                 const timeString = msg.created_at 
                   ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
@@ -233,18 +237,24 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
                     {/* Message Bubble */}
                     <div
                       onClick={() => {
-                        if (isMe) {
-                          setSelectedMsgId(isSelected ? null : msg.id);
-                        }
+                        setSelectedMsgId(isSelected ? null : msg.id);
                       }}
-                      className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-body transition-all ${
-                        isMe ? "cursor-pointer" : ""
-                      } ${
+                      className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-body cursor-pointer transition-all ${
                         isMe
                           ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-br-none shadow-lg shadow-rose-500/25 border border-rose-400/20"
                           : "bg-zinc-900 text-zinc-100 rounded-bl-none border border-white/15 shadow-md"
                       }`}
                     >
+                      {/* Quoted Reply Preview Inside Bubble */}
+                      {msg.reply_to && (
+                        <div className="mb-1.5 p-2 rounded-lg bg-black/30 border-l-2 border-rose-400 text-[11px] text-zinc-300">
+                          <p className="font-semibold text-rose-300">
+                            {msg.reply_to.sender?.trim().toLowerCase() === cleanCurrentUser ? "You" : partnerName}
+                          </p>
+                          <p className="truncate text-zinc-400">{msg.reply_to.text}</p>
+                        </div>
+                      )}
+
                       {isEditing ? (
                         <div className="flex flex-col gap-2">
                           <input
@@ -253,8 +263,9 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
                             onChange={(e) => setEditText(e.target.value)}
                             className="bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs outline-none border border-white/30"
                             autoFocus
+                            onClick={(e) => e.stopPropagation()}
                           />
-                          <div className="flex gap-2 justify-end">
+                          <div className="flex gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
                             <button 
                               onClick={() => setEditingMsgId(null)}
                               className="text-[11px] text-zinc-300 hover:text-white px-2 py-0.5"
@@ -280,14 +291,26 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
                       )}
                     </div>
 
-                    {/* Action Popup Menu (Edit & Unsend on tap) */}
-                    {isSelected && isMe && !isEditing && (
+                    {/* Action Popup Menu (Aligned dynamically to respective side) */}
+                    {isSelected && !isEditing && (
                       <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                        initial={{ opacity: 0, scale: 0.95, y: isNearBottom ? 5 : -5 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="absolute z-30 mt-1.5 bg-zinc-900 border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col py-1.5 text-xs text-white right-0 top-full backdrop-blur-xl"
+                        className={`absolute z-40 bg-zinc-900 border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col py-1.5 text-xs text-white backdrop-blur-xl ${
+                          isMe ? "right-0" : "left-0"
+                        } ${isNearBottom ? "bottom-full mb-1.5" : "top-full mt-1.5"}`}
                       >
-                        {canEdit(msg) && (
+                        <button
+                          onClick={() => {
+                            setReplyingTo(msg);
+                            setSelectedMsgId(null);
+                          }}
+                          className="px-4 py-2.5 text-left text-zinc-200 hover:bg-white/10 transition-colors flex items-center gap-2 font-medium"
+                        >
+                          <span>↩️</span> Reply
+                        </button>
+
+                        {isMe && canEdit(msg) && (
                           <button
                             onClick={() => {
                               setEditingMsgId(msg.id);
@@ -299,12 +322,15 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
                             <span>✏️</span> Edit Message
                           </button>
                         )}
-                        <button
-                          onClick={() => handleDelete(msg)}
-                          className="px-4 py-2.5 text-left text-rose-400 hover:bg-white/10 transition-colors flex items-center gap-2 font-medium"
-                        >
-                          <span>🗑️</span> Unsend
-                        </button>
+
+                        {isMe && (
+                          <button
+                            onClick={() => handleDelete(msg)}
+                            className="px-4 py-2.5 text-left text-rose-400 hover:bg-white/10 transition-colors flex items-center gap-2 font-medium"
+                          >
+                            <span>🗑️</span> Unsend
+                          </button>
+                        )}
                       </motion.div>
                     )}
                   </div>
@@ -313,13 +339,29 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
               <div ref={scrollRef} />
             </div>
 
+            {/* Active Reply Banner Above Input */}
+            {replyingTo && (
+              <div className="px-4 py-2 bg-zinc-900/90 border-t border-white/10 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="text-rose-400 font-bold">↩️ Replying to {replyingTo.sender?.trim().toLowerCase() === cleanCurrentUser ? "yourself" : partnerName}:</span>
+                  <span className="text-zinc-400 truncate">{replyingTo.text}</span>
+                </div>
+                <button 
+                  onClick={() => setReplyingTo(null)}
+                  className="text-zinc-400 hover:text-white font-bold ml-2 text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             {/* Input Box */}
             <form onSubmit={sendMessage} className="p-3 border-t border-white/10 bg-zinc-900/80 flex gap-2 items-center">
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Message..."
+                placeholder={replyingTo ? "Type a reply..." : "Message..."}
                 className="flex-1 px-4 py-2.5 rounded-full bg-zinc-950 border border-white/15 text-white placeholder-zinc-400 text-xs sm:text-sm focus:outline-none focus:border-rose-500 transition-colors shadow-inner"
               />
               <button
