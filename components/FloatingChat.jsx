@@ -144,9 +144,6 @@ export default function FloatingChat({ currentUser = "Aryan" }) {
                   <h3 className="font-display font-bold text-white text-sm tracking-wide">
                     {partnerName}
                   </h3>
-                  <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active now
-                  </span>
                 </div>
               </div>
               <button
