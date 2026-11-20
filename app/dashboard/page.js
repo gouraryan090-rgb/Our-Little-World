@@ -20,11 +20,18 @@ const menuItems = [
 export default function DashboardHome() {
   const router = useRouter();
   const [isLoadingSpace, setIsLoadingSpace] = useState(false);
+  const [isLoadingGames, setIsLoadingGames] = useState(false);
 
   const handleEnterSpace = (e) => {
     e.preventDefault();
     setIsLoadingSpace(true);
     router.push("/dashboard/space");
+  };
+
+  const handleEnterGames = (e) => {
+    e.preventDefault();
+    setIsLoadingGames(true);
+    router.push("/dashboard/games");
   };
 
   return (
@@ -48,12 +55,11 @@ export default function DashboardHome() {
         ))}
       </div>
 
-      {/* Our Shared Space Banner (Interactive Features Hub) */}
-      <div className="mt-16 pt-12 border-t border-ink/10">
-        <div 
-          onClick={handleEnterSpace}
-          className="block group cursor-pointer"
-        >
+      {/* Interactive Banners Section */}
+      <div className="mt-16 pt-12 border-t border-ink/10 space-y-6">
+        
+        {/* Our Shared Space Banner */}
+        <div onClick={handleEnterSpace} className="block group cursor-pointer">
           <div className="glass rounded-[2rem] p-6 sm:p-8 border border-rose/25 bg-gradient-to-r from-rose/10 via-transparent to-pink-500/10 hover:border-rose/50 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-rose">
@@ -82,6 +88,38 @@ export default function DashboardHome() {
             </div>
           </div>
         </div>
+
+        {/* Games Banner */}
+        <div onClick={handleEnterGames} className="block group cursor-pointer">
+          <div className="glass rounded-[2rem] p-6 sm:p-8 border border-lilac/30 bg-gradient-to-r from-lilac/10 via-transparent to-purple-500/10 hover:border-lilac/60 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest text-lilac">
+                Play Zone 🎮
+              </span>
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink mt-1 group-hover:text-lilac transition-colors">
+                Games
+              </h2>
+              <p className="font-body text-ink/60 text-sm sm:text-base mt-1">
+                Challenge each other and have fun.
+              </p>
+            </div>
+
+            <div className="inline-flex items-center justify-center gap-2 bg-lilac text-white font-body font-bold px-6 py-3.5 rounded-2xl shadow-lg shadow-lilac/25 group-hover:bg-lilac/90 transition-all shrink-0 min-w-[140px]">
+              {isLoadingGames ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Loading...</span>
+                </div>
+              ) : (
+                <>
+                  <span>Play Now</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* Footer Links */}
