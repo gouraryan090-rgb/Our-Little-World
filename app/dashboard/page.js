@@ -14,24 +14,17 @@ const menuItems = [
   { id: "aryan-expectations", title: "Aryan's Expectations", desc: "What he hopes for.", accent: "from-rose/20 to-rose/5", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk1k8i3v_gOV_v2eNMxaYrgEP81SFocyoxr0zoI_JYjQ&s=10" },
   { id: "manshi-intentions", title: "Manshi's Intentions", desc: "Her true feelings.", accent: "from-lilac/20 to-lilac/5", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4_UdR5P3raummfjIFFGw02zUvPfKvVezMQFXkPg6rAw&s" },
   { id: "aryan-intentions", title: "Aryan's Intentions", desc: "His true feelings.", accent: "from-rose/20 to-rose/5", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAgRYp0He-Bxpip1_zqoPivJ1wja7Lds4OYO6LPwhCYg&s=10" },
-  { id: "gallery", title: "Gallery", desc: "Our memories together.", accent: "from-amber-200/20 to-amber-200/5", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYDiDKBtjkONeWLvUJ977NzGP3slOVuwh7rY3Bm8gtyg&s=10" },
+  { id: "gallery", title: "Gallery", desc: "Our memories together.", accent: "from-amber-200/20 to-amber-200/5", image: "https://encrypted-tbn0.gstatic.com/images?tbn:ANd9GcSYDiDKBtjkONeWLvUJ977NzGP3slOVuwh7rY3Bm8gtyg&s=10" },
 ];
 
 export default function DashboardHome() {
   const router = useRouter();
   const [isLoadingSpace, setIsLoadingSpace] = useState(false);
-  const [isLoadingGames, setIsLoadingGames] = useState(false);
 
   const handleEnterSpace = (e) => {
     e.preventDefault();
     setIsLoadingSpace(true);
     router.push("/dashboard/space");
-  };
-
-  const handleEnterGames = (e) => {
-    e.preventDefault();
-    setIsLoadingGames(true);
-    router.push("/dashboard/games");
   };
 
   return (
@@ -82,37 +75,6 @@ export default function DashboardHome() {
               ) : (
                 <>
                   <span>Enter Space</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Games Banner */}
-        <div onClick={handleEnterGames} className="block group cursor-pointer">
-          <div className="glass rounded-[2rem] p-6 sm:p-8 border border-lilac/30 bg-gradient-to-r from-lilac/10 via-transparent to-purple-500/10 hover:border-lilac/60 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-lilac">
-                Play Zone 🎮
-              </span>
-              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink mt-1 group-hover:text-lilac transition-colors">
-                Games
-              </h2>
-              <p className="font-body text-ink/60 text-sm sm:text-base mt-1">
-                Challenge each other and have fun.
-              </p>
-            </div>
-
-            <div className="inline-flex items-center justify-center gap-2 bg-lilac text-white font-body font-bold px-6 py-3.5 rounded-2xl shadow-lg shadow-lilac/25 group-hover:bg-lilac/90 transition-all shrink-0 min-w-[140px]">
-              {isLoadingGames ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Loading...</span>
-                </div>
-              ) : (
-                <>
-                  <span>Play Now</span>
                   <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </>
               )}

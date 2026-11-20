@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import PageTransition from "../../components/PageTransition";
-import FloatingChat from "../../components/FloatingChat"; // <-- Imported FloatingChat
+import FloatingChat from "../../components/FloatingChat";
 import { Heart, Star, Sparkles } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession(); 
   const router = useRouter();
 
   useEffect(() => {
@@ -55,6 +55,8 @@ export default function DashboardLayout({ children }) {
 
         <Navbar userName={session.user.name} />
         
+        
+
         <main className="pt-28 pb-20 px-4 max-w-5xl mx-auto relative z-10">
           <PageTransition>
             {children}
