@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ImageIcon, Play } from "lucide-react";
+import { ArrowLeft, ImageIcon, Play, RefreshCw } from "lucide-react"; // <-- RefreshCw import kiya
 import Link from "next/link";
 import PhotoModal from "../../../components/PhotoModal";
 import VideoModal from "../../../components/VideoModal";
@@ -11,27 +11,40 @@ export default function GalleryPage() {
   const [activeTab, setActiveTab] = useState("photos");
   const [data, setData] = useState({ photos: [], videos: [] });
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false); // <-- Naya state
   const [error, setError] = useState(null);
   
   // Modal states
   const [activeVideo, setActiveVideo] = useState(null);
   const [activePhoto, setActivePhoto] = useState(null);
 
-  useEffect(() => {
+  const fetchDriveData = () => {
     setLoading(true);
+    setError(null);
     fetch("/api/drive")
       .then((res) => res.json())
       .then((resData) => {
         if (resData.error) throw new Error(resData.error);
         setData({ photos: resData.photos || [], videos: resData.videos || [] });
         setLoading(false);
+        setIsRefreshing(false);
       })
       .catch((err) => {
         console.error(err);
         setError("Media load nahi ho payi. Drive check karo.");
         setLoading(false);
+        setIsRefreshing(false);
       });
+  };
+
+  useEffect(() => {
+    fetchDriveData();
   }, []);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchDriveData();
+  };
 
   const currentItems = activeTab === "photos" ? data.photos : data.videos;
 
@@ -44,12 +57,29 @@ export default function GalleryPage() {
         <ArrowLeft size={20} /> Back to Home
       </Link>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-        <h1 className="font-display text-5xl md:text-6xl font-extrabold text-ink mb-4">
-          Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose to-lilac">Gallery</span>
-        </h1>
-        <p className="font-accent italic text-ink/60">Every picture tells our story.</p>
-      </motion.div>
+      {/* Header with Refresh Button */}
+      <div className="flex justify-between items-start mb-12">
+        <div className="flex-1 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 className="font-display text-5xl md:text-6xl font-extrabold text-ink mb-4">
+              Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose to-lilac">Gallery</span>
+            </h1>
+            <p className="font-accent italic text-ink/60">Every picture tells our story.</p>
+          </motion.div>
+        </div>
+        
+        {/* Refresh Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleRefresh}
+          disabled={isRefreshing || loading}
+          className="mt-2 p-3 bg-white border-2 border-ink/10 hover:border-rose/50 rounded-full shadow-soft hover:shadow-glow transition-all duration-300 text-ink/70 hover:text-rose disabled:opacity-50"
+          title="Refresh from Drive"
+        >
+          <RefreshCw size={24} className={isRefreshing ? "animate-spin" : ""} />
+        </motion.button>
+      </div>
 
       {/* Tabs */}
       <div className="flex justify-center gap-4 mb-10">
