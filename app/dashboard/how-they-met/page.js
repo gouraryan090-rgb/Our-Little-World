@@ -45,7 +45,7 @@ export default function HowTheyMet() {
 
                 {!imgError && (
                   <img
-                    src="https://img.magnific.com/free-photo/couple-holding-hands-romantic-valentine-s-illustration-social-media-post_53876-104446.jpg?semt=ais_hybrid&w=740&q=80" 
+                    src="https://cdn.phototourl.com/anon/2026-11-21-ff0148ab-4fa4-4846-b88e-1bb3eba3b147.webp" 
                     alt="How They Met"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     onError={() => setImgError(true)}
